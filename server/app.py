@@ -1,12 +1,14 @@
 from flask import Flask
+from config import Config
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////databases/users.db'
+app.config.from_object(Config)
 db = SQLAlchemy(app)
-
-from modules import models
+migrate = Migrate(app, db)
 
 if __name__ == '__main__':
+    from modules import models
     from modules.routes import *
     app.run()
