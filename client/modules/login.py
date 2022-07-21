@@ -2,7 +2,7 @@ import os
 import json
 import datetime
 from hashlib import sha256
-from main import *
+from main import logger
 
 
 class User:
@@ -14,13 +14,18 @@ class User:
 
     # Check is user logged(session file)
     def is_logged(self):
-        if os.path.exists(f'{self.data_path}/session'):
+        try:
+            with open(f'{self.data_path}/session', 'r') as file:
+                file_len = len(file.read())
+        except Exception as e:
+            logger.warning(f'Warning: {e}')
+        if os.path.exists(f'{self.data_path}/session') and file_len != 0:
             return True
         return False
 
     # Create session file where store username, password-hash and login date
     def new_login(self, login, password):
-        if self.is_logged():
+        if not self.is_logged():
             try:
                 password_hash = sha256(password.encode('utf-8')).hexdigest()
                 with open(f'{self.data_path}/session', 'w') as file:
@@ -39,6 +44,3 @@ class User:
         if self.is_logged():
             with open(f'{self.data_path}/session', 'w') as file:
                 file.write('')
-
-
-user = User()
