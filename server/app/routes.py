@@ -42,10 +42,15 @@ def _api_check_login(login):
 
 
 # Delete user
-@app.route('api/delete-user', methods=['GET', 'POST'])
+@app.route('/api/delete-user', methods=['GET', 'POST'])
 def _api_delete_user():
-    try:
-        if request.method = 'POST':
-            data = request.get_json()
-    except Exception as e:
-        logger.error(f'Error: {e}')
+    if request.method == 'POST':
+        data = request.get_json()
+        user_to_delete = User.query.filter_by(username=data['username']).first()
+        print(1)
+        if user_to_delete:
+            db.session.delete(user_to_delete)
+            db.session.commit()
+            return {'success': True}
+        print(2)
+        return {'success': False}
