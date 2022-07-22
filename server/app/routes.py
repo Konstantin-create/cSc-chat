@@ -47,10 +47,25 @@ def _api_delete_user():
     if request.method == 'POST':
         data = request.get_json()
         user_to_delete = User.query.filter_by(username=data['username']).first()
-        print(1)
         if user_to_delete:
             db.session.delete(user_to_delete)
             db.session.commit()
             return {'success': True}
-        print(2)
         return {'success': False}
+
+
+# Chat routes
+# Create chat
+@app.route('/api/create-chat/', methods=['GET', 'POST'])
+def _api_create_chat():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            new_chat = Chat(chat_name=data['chat_name'])
+            db.session.add(new_chat)
+            db.session.commit()
+            return {'success': True, 'chat_id': new_chat.id}
+    except Exception as e:
+        logger.error(f'Error: {e}')
+        return {'success': False, 'chat_id': None}
+

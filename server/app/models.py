@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 from hashlib import sha256
 
 
@@ -12,4 +13,23 @@ class User(db.Model):
             return True
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return f'<User {self.username}>'
+
+
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chat_name = db.Column(db.String(80), unique=True, nullable=False)
+
+    def __repr__(self):
+        return f'<Chat {self.id}>'
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.String(140))
+    from_user = db.Column(db.Integer, db.ForeignKey('user.id'))
+    from_chat = db.Column(db.Integer, db.ForeignKey('chat.id'))
+    time_stamp = db.Column(db.DateTime, index=True, default=datetime.utcnow())
+
+    def __repr__(self):
+        return f'<Message | Chat: {self.from_chat} | User: {self.from_user}>'
