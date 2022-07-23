@@ -10,38 +10,39 @@ class ServerConnection:
         self.server_ip = 'http://127.0.0.1:5000'
     
     # User actions
-    # Send login request to server. Responce is get json {'logged': bool}
-    def login(self, username, password):
+    """'success': False, when server error happend, so in that case other dict values became None. In other cases 'success': True"""
+    def login(self, username: str, password: str):
+        """Login function get username and password params. Return dict {'success': bool, 'logged': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/user-login',
-                json={'login': username, 'password-hash': password_hash(password)}
+                json={'username': username, 'password-hash': password_hash(password)}
             ).text)
             return response
         except Exception as e:
             logger.error(e)
 
-    # Send registration request to server. Responce is json {'is_registered': bool}
-    def registration(self, login, password):
+    def registration(self, username: str, password: str):
+        """Registration function get username and password params. Return dict {'success: bool, 'is_registered': bool}"""
         try:
             resource = json.loads(requests.post(
                 f'{self.server_ip}/api/user-signup',
-                json={'login': login, 'password-hash': password_hash(password)}
+                json={'username': username, 'password-hash': password_hash(password)}
             ).text)
             return resource
         except Exception as e:
             logger.error(e)
     
-    # Check if nickname used by anouther user. Responce is json {'is_free': bool}
-    def check_nickname(self, nickname):
+    def check_nickname(self, username: str):
+        """Check if nickname used by anouther user function. Get username param. Return dict {'success': bool, 'is_free': bool}"""
         try:
-            response = json.loads(requests.get(f'{self.server_ip}/api/check-login/{nickname}').text)
-            return response['is_free']
+            response = json.loads(requests.get(f'{self.server_ip}/api/check-login/{username}').text)
+            return response
         except Exception as e:
             logger.error(e)
 
-    # Send delete user request to server. Responce is json {'success': bool}
-    def delete_user(self, username):
+    def delete_user(self, username: str):
+        """Delete user function. Get username param. Return dict {'success': bool, 'deleted': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/delete-user', json={'username': username}).text)
@@ -50,18 +51,18 @@ class ServerConnection:
             logger.error(e)
     
     # Chats actions
-    # Send create_chat request. Responce is json {'success': bool, 'chat_id': int}
-    def create_chat(self, chat_name, chat_creator):
+    def create_chat(self, chat_name: str, chat_creator-id: int):
+        """Create chat function. Get chat_name, chat_creator params. Return dict {'success': bool, 'chat_id': int}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/create-chat',
-                json={'chat_name': chat_name, 'chat_creator': chat_creator}).text)
+                json={'chat_name': chat_name, 'chat_creator': chat_creator-id}).text)
             return response
         except Exception as e:
             logger.error(e)
     
-    # Send delete_chat by name requests. Responce is json {'success': bool}
-    def delete_chat_by_name(self, chat_name, chat_creator):
+    def delete_chat_by_name(self, chat_name: str, chat_creator: int):
+        """Delete chat by chatname function. Get chatname, chat_creator params. Return dict {'success': bool', 'deleted': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/remove-chat/by-name',
@@ -70,59 +71,60 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
-    # Send delete_chat by id requests. Responce is json {'success': bool}
-    def delete_chat_by_id(self, id, chat_creator):
+    def delete_chat_by_id(self, id: int, chat_creator_id: int):
+        """Delete chat by id function. Get id(chat_id), chat_creator_id params. Return dict {'success': bool, 'deleted': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/remove-chat/by-id',
-                json={'id': id, 'chat_creator': chat_creator}).text)
+                json={'id': id, 'chat_creator': chat_creator_id}).text)
             return response
         except Exception as e:
             logger.error(e)
 
-    # Send request to get chat info by id. Responce is json {'success': bool, 'chat': {'id': int, 'chat_name': str, 'chat_creator': str}}
-    def get_chat_info_by_id(self, id):
-        try:
-            response = json.loads(requests.get(f'{self.server_ip}/api/get-chat-info/by-id/{id}').text)
+    def get_chat_info_by_id(self, chat_id: id):
+        """Get chat info by id function. Get chat_id param. Return dict {'success': bool, 'chat': {'id': int, 'chat_name': str, 'chat_creator': str}}"""
+        try: 
+            response = json.loads(requests.get(f'{self.server_ip}/api/get-chat-info/by-id/{chat_id}').text)
             return response
         except Exception as e:
             logger.error(e)
         
-    # Send request to get chat info by chat name. Responce is json {'success': bool, 'chat': {'id': int, 'chat_name': str, 'chat_creator': str}}
-    def get_chat_info_by_name(self, chat_name):
+    def get_chat_info_by_name(self, chat_name: str):
+        """Get chat info by chat_name function. Get chat_name param. Return dict {'success': bool, 'chat': {'id': int, 'chat_name': str, 'chat_creator': str}}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/get-chat-info/by-name/{chat_name}').text)
             return response
         except Exception as e:
             logger.error(e)
     
-    # Send request to create message. Response is json {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}
-    def create_message(self, from_user, from_chat, body):
+    # Message actions
+    def create_message(self, from_user: id, from_chat:id, body:str):
+        """Create message function. Get from_user, from_chat, body params. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
         try:
             response = json.loads(requests.post(
-                f'{self.server_ip}/api/message/create', json={'body'=body, 'from_user': from_user, 'from_chat': from_chat}).text)
+                f'{self.server_ip}/api/message/create', json={'body': body, 'from_user': from_user, 'from_chat': from_chat}).text)
             return response
         except Exception as e:
-            logger.error()
+            logger.error(e)
 
-    # Send request to get message info. Response is json {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}
     def get_message_info(self, message_id):
+        """Get message info. Get message_id param. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/message/{message_id}').text)
             return response
         except Exception as e:
             logger.error(e)
     
-    # Send request to delete message. Response is json {'success': bool}
-    def delete_message(self, message_id):
+    def delete_message(self, message_id:int):
+        """Delete message function. Get message_id param. Return dict {'success': bool, 'deleted': bool}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/message/delete/{message_id}').text)
             return response
         except Exception as e:
             logger.error(e)
 
-    # Send request to get all messages from chat id. Response is json {'success': bool, messages: [{'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}, ...]}
-    def get_chat_messages(self, chat_id):
+    def get_chat_messages(self, chat_id:int):
+        """Get all chat messages. Get chat_id param. Return dict {'success': bool, messages: [{'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}, ...]}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/messages/all/chat-id/{chat_id}').text)
             return response

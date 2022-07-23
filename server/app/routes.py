@@ -10,15 +10,16 @@ def _api_signup():
     try:
         if request.method == 'POST':
             data = request.get_json()
-            login = data['login']
+            login = data['username']
             password_hash = data['password-hash']
             user = User(username=login, password_hash=password_hash)
             db.session.add(user)
             db.session.commit()
-            return {'is_registered': True}
-        return {'is_registered': False}
+            return {'success': True, 'is_registered': True} # If username and password are correct
+        return {'success': True, 'is_registered': False} # If username or password is incorrect
     except Exception as e:
         logger.error(f'Error in user signup block: {e}')
+        return {'success': False, 'is_registered': None}
 
 
 # Check user login
@@ -27,14 +28,14 @@ def _api_login():
     try:
         if request.method == 'POST':
             data = request.get_json()
-            username = data['login']
+            username = data['username']
             password = data['password-hash']
             if User.query.filter_by(username=username, password_hash=password).first():
-                return {'logged': True}
-            return {'logged': False}
+                return {'success': True, 'logged': True}
+            return {'success': True, 'logged': False}
     except Exception as e:
         logger.error(f'Error in user login block: {e}')
-        return {'logged': False}
+        return {'success': False, 'logged': None}
 
 
 # Check is user nickname free
@@ -42,10 +43,11 @@ def _api_login():
 def _api_check_login(login):
     try:
         if User.query.filter_by(username=login).first():
-            return {'is_free': False}
-        return {'is_free': True}
+            return {'success': True, 'is_free': False}
+        return {'success': True, 'is_free': True}
     except Exception as e:
         logger.error(f'Error in check username block: {e}')
+        return {'success': False, 'is_free': None}
 
 
 # Delete user
@@ -58,11 +60,11 @@ def _api_delete_user():
             if user_to_delete:
                 db.session.delete(user_to_delete)
                 db.session.commit()
-                return {'success': True}
-            return {'success': False}
+                return {'success': True, 'deleted': True}
+            return {'success': True, 'deleted': False}
     except Exception as e:
         logger.error(f'Error in delete user block: {e}')
-        return {'success': False}
+        return {'success': False, 'deleted': None}
 
 
 # Chat routes
@@ -95,11 +97,11 @@ def _api_delete_chat_by_name():
                         db.session.delete(message) 
                 db.session.delete(chat_to_delete)
                 db.session.commit()
-                return {'success': True}
-        return {'success': False}
+                return {'success': True, 'deleted': True}
+        return {'success': True, 'deleted': False}
     except Exception as e:
         logger.error(f'Error in delete chat by name block: {e}')
-        return {'success': False}
+        return {'success': False, 'deleted': None}
 
 # Remove chat by id
 @app.route('/api/remove-chat/by-id', methods=['GET', 'POST'])
@@ -107,7 +109,7 @@ def _api_delete_chat_by_id():
     try:
         if request.method == 'POST':
             data = request.get_json()
-            chat_to_delete = Chat.query.filter_by(id=data['chat_id']).first()
+            chat_to_delete = Chat.query.filter_by(id=data['id']).first()
             chat_messages = Message.query.filter_by(from_chat=chat_to_delete.id).all()
             if chat_to_delete and chat_to_delete.chat_creator == data['chat_creator']:
                 if chat_messages is not None:
@@ -115,20 +117,20 @@ def _api_delete_chat_by_id():
                         db.session.delete(message)
                 db.session.delete(chat_to_delete)
                 db.session.commit()
-                return {'success': True}
-        return {'success': False}
+                return {'success': True, 'deleted': True}
+        return {'success': True, 'deleted': False}
     except Exception as e:
         logger.error(f'Error in delete chat by id block: {e}')
-        return {'success': False}
+        return {'success': False, 'deleted': None}
 
 # Get chat name by id
-@app.route('/api/get-chat-info/by-id/<int:id>')
-def _api_get_chat_info_id(id):
+@app.route('/api/get-chat-info/by-id/<int:chat_id>')
+def _api_get_chat_info_id(chat_id):
     try:
-        chat = Chat.query.filter_by(id=id).first()
+        chat = Chat.query.filter_by(id=chat_id).first()
         if chat:
-            return {'success': True, chat: {'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator': chat.chat_creator}}
-        return {'success': False, chat: None}
+            return {'success': True, 'chat': {'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator': chat.chat_creator}}
+        return {'success': True, chat: None}
     except Exception as e:
         logger.error(f'Error in get-chat-info by id block: {e}')
         return {'success': False, chat: None}
@@ -138,9 +140,10 @@ def _api_get_chat_info_id(id):
 def _api_get_chat_info_name(chat_name):
     try:
         chat = Chat.query.filter_by(chat_name=chat_name).first()
+        print(chat)
         if chat:
-            return {'success': True, chat: {'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator': chat.chat_creator}}
-        return {'success': False, chat: None}
+            return {'success': True, 'chat': {'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator': chat.chat_creator}}
+        return {'success': True, chat: None}
     except Exception as e:
         logger.error(f'Error in get-chat-info by name block: {e}')
         return {'success': False, chat: None}
@@ -156,10 +159,10 @@ def _api_create_message():
             new_message = Message(body=data['body'], from_user=data['from_user'], from_chat=data['from_chat'])
             db.session.add(new_message)
             db.session.commit()
-            return {'success': True, message: {'id': new_message.id, 'from_user': new_message.from_user, 'from_chat': new_message.from_chat, 'body': new_message.body, 'time_stamp': new_message.time_stamp}}
+            return {'success': True, 'message': {'id': new_message.id, 'from_user': new_message.from_user, 'from_chat': new_message.from_chat, 'body': new_message.body, 'time_stamp': new_message.time_stamp}}
     except Exception as e:
         logger.error(f'Error in create message block: {e}')
-        return {'success': False, message: None}
+        return {'success': False, 'message': None}
 
 # Get message info by id
 @app.route('/api/message/<int:message_id>')
@@ -178,10 +181,10 @@ def _api_delete_message(message_id):
         message_to_delete = Message.query.filter_by(id=message_id).first()
         db.session.delete(message_to_delete)
         db.session.commit()
-        return {'success': False}
+        return {'success': True, 'deleted': True}
     except Exception as e:
         logger.error(f'Error in delete message block: {e}')
-        return {'success': False}
+        return {'success': False, 'deleted': None}
 
 
 # Get messages by chat id
@@ -194,7 +197,8 @@ def _api_get_chat_messages(chat_id):
             for message in messages:
                 output_messages.append({'id': message.id, 'from_user': message.from_user, 'from_chat': message.from_chat, 'body': message.body, 'time_stamp': message.time_stamp})
             return {'success': True, 'messages': output_messages}
-        return {'success': False, 'messages': None}
+        return {'success': True, 'messages': None}
     except Exception as e:
         logger.error(f'Error in get chat messages block: {e}')
+        return {'success': False, 'messages': None}
 
