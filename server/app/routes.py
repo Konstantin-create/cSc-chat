@@ -1,6 +1,6 @@
 from app import app, request, db
 from loguru import logger
-from app.models import User
+from app.models import User, Chat, Message
 
 
 # User routes
@@ -44,13 +44,17 @@ def _api_check_login(login):
 # Delete user
 @app.route('/api/delete-user', methods=['GET', 'POST'])
 def _api_delete_user():
-    if request.method == 'POST':
-        data = request.get_json()
-        user_to_delete = User.query.filter_by(username=data['username']).first()
-        if user_to_delete:
-            db.session.delete(user_to_delete)
-            db.session.commit()
-            return {'success': True}
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            user_to_delete = User.query.filter_by(username=data['username']).first()
+            if user_to_delete:
+                db.session.delete(user_to_delete)
+                db.session.commit()
+                return {'success': True}
+            return {'success': False}
+    except Exception as e:
+        logger.error(f'Error: {e}')
         return {'success': False}
 
 
@@ -61,11 +65,28 @@ def _api_create_chat():
     try:
         if request.method == 'POST':
             data = request.get_json()
-            new_chat = Chat(chat_name=data['chat_name'])
+            new_chat = Chat(chat_name=data['chat_name'], chat_creator=data['chat_creator'])
             db.session.add(new_chat)
             db.session.commit()
             return {'success': True, 'chat_id': new_chat.id}
     except Exception as e:
         logger.error(f'Error: {e}')
         return {'success': False, 'chat_id': None}
+
+
+# Remove chat
+@app.route('/api/remove-chat', methods=['GET', 'POST'])
+def _api_delete_chat():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            chat_to_delete = Chat.query.filter_by(chat_name=data['chat_name']).first()
+            if chat_to_delete and chat_to_delete.chat_creator == data['chat_creator']:
+                db.session.delete(chat_to_delete)
+                db.session.commit()
+                return {'success': True}
+        return {'success': False}
+    except Exception as e:
+        logger.error(f'Error: {e}')
+        return {'success': False}
 

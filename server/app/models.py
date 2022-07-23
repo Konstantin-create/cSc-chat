@@ -19,9 +19,10 @@ class User(db.Model):
 class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chat_name = db.Column(db.String(80), unique=True, nullable=False)
+    chat_creator = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return f'<Chat {self.id}>'
+        return f'<Chat {self.chat_name}>'
 
 
 class Message(db.Model):
