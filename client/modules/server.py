@@ -41,11 +41,16 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
+<<<<<<< HEAD
     def delete_user(self, username: str):
         """Delete user function. Get username param. Return dict {'success': bool, 'deleted': bool}"""
+=======
+    # Send delete user request to server. Responce is json {'success': bool}
+    def delete_user(self, username, password):
+>>>>>>> origin
         try:
             response = json.loads(requests.post(
-                f'{self.server_ip}/api/delete-user', json={'username': username}).text)
+                f'{self.server_ip}/api/delete-user', json={'username': username, 'password-hash': password_hash(password)}).text)
             return response
         except Exception as e:
             logger.error(e)
