@@ -1,6 +1,8 @@
 import json
 from loguru import logger
 from hashlib import sha256
+from datetime import datetime
+
 
 
 def password_hash(password):
@@ -45,13 +47,85 @@ class User:
             logger.error(e)
             return {'recorded': False}
 
-    def change_session_key(self, key:str, value: any):
-        """Function to change some sesssion values in file. Get key, value params. Return dict {'recorded': bool}"""
+    # Login/registration routes
+    def is_logged(self):
+        """Function to read cdata/session.session and get user data from threre. Return dict {'logged': bool, 'user': dict}"""
         try:
-            session = get_cdata()['session']
-            session[key] = value
-            set_session(session)
+            session = self.get_cdata()['session']
+            if ('user' in session) and ('username' in session['user']) and ('password_hash' in session['password_hash']):
+                return {'logged': True, 'user': session['user']}
         except Exception as e:
             logger.error(e)
-            return {'recorded': False}
+            return {'logged': False, user: None}
+
+    def login(self, username, password):
+        """Function to write userdata in session file. Get username, password params. Return dict {'logged': bool, 'user': dict}"""
+        try:
+            user = {'username': username, 'password_hash': password_hash(password), 'login_time': datetime.utcnow()}
+            session = self.get_cdata()['session']
+            session['user'] = user
+            self.set_session(session)
+            return {'logged': True, 'user': user}
+        except Exception as e:
+            logger.error(e)
+            return {'logged': False}
+
+    def logout(self, username, password):
+        """Function to logout user. Get username, password params. Return dict {'logout': bool}"""
+        try:
+            session = self.get_cdata()['session']
+            if 'user' in session:
+                if session['user']['username'] == username and session['user']['password'] == password_hash(password):
+                    del session['user']
+                else:
+                    logger.warning('Wrong username or password')
+                    return {'logout': False}
+            return {'logout': True}
+        except Exception as e:
+            logger.error(e)
+            return {'logout': False}
+
+    # Chat functions
+    def delete_chat(self, chat_id):
+        """Function to delete chat by id. Get chat id param. Return dict {'deleted': bool}"""
+        try:
+            chats = self.get_cdata()
+            for chat in chats:
+                if chat['id'] == chat_id:
+                    del chat
+                    return {'deleted': True}
+        except Exception as e:
+            logger.error(e)
+            return {'deleted': False}
+
+    # Messages functions
+    def get_all_messages(self):
+        """Function to get all saved messages. Return dict {'messages': dict}"""
+        try:
+            with open(f'{self.root}/cdata/messages.json', 'r') as file:
+                messages = json.load(file)
+            return {'messages': messages}
+        except Exception as e:
+            logger.error(e)
+            return {'messages': None}
+
+    def get_chat_messages(self, chat_id):
+        """Function to get saved messages by chat id. Get chat id param. Return dict {'messages': list}"""
+        try:
+            all_messages = self.get_all_messages()
+            if chat_id in all_messages:
+                return {'messages', all_messages[chat_id]}
+            return {'messages': []}
+        except Exception as e:
+            logger.error(e)
+            return {'messages': None}
+
+    def delete_chat_message(self, chat_id, message_id):
+        """Function to delete chat by chat id. Return dict {'deleted': bool}"""
+        try:
+            messages = self.get_all_messages()
+            del messages[chat_id][message_id]
+        except Exception as e:
+            logger.error(e)
+            return {'deleted': None}
 
