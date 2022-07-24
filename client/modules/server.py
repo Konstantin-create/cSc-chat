@@ -41,18 +41,8 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    def delete_user(self, username: str):
-        """Delete user function. Get username param. Return dict {'success': bool, 'deleted': bool}"""
-=======
-    # Send delete user request to server. Responce is json {'success': bool}
-    def delete_user(self, username, password):
->>>>>>> origin
-=======
     def delete_user(self, username: str, password):
         """Delete user function. Get username and password params. Return dict {'success': bool, 'deleted': bool}"""
->>>>>>> c118d21 (Work on api sequrity)
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/delete-user', json={'username': username, 'password-hash': password_hash(password)}).text)
