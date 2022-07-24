@@ -61,11 +61,7 @@ def _api_delete_user():
                 db.session.delete(user_to_delete)
                 db.session.commit()
                 return {'success': True, 'deleted': True}
-<<<<<<< HEAD
             return {'success': True, 'deleted': False}
-=======
-            return {'success': False}
->>>>>>> origin
     except Exception as e:
         logger.error(f'Error in delete user block: {e}')
         return {'success': False, 'deleted': None}
