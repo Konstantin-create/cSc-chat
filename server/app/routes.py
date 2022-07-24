@@ -56,7 +56,7 @@ def _api_delete_user():
     try:
         if request.method == 'POST':
             data = request.get_json()
-            user_to_delete = User.query.filter_by(username=data['username']).first()
+            user_to_delete = User.query.filter_by(username=data['username'], password_hash=data['password-hash']).first()
             if user_to_delete:
                 db.session.delete(user_to_delete)
                 db.session.commit()
@@ -147,6 +147,18 @@ def _api_get_chat_info_name(chat_name):
     except Exception as e:
         logger.error(f'Error in get-chat-info by name block: {e}')
         return {'success': False, chat: None}
+
+# Get chats from user id
+@app.route('/api/get-users-chat/<int: user_id>')
+def _api_get_users_chat(user_id):
+    try:
+        chats = Chat.query.filter_by(from_user=user_id).all()
+        if chats:
+            return {'success': True, 'chats': chats}
+        return {'success': True, 'chats': None}
+    except Exception as e:
+        logger.error(f'Error in get_users_chat block: {e}')
+        return {'success': False, 'chats': None}
 
 
 # Message routes
