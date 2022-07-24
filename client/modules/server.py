@@ -42,12 +42,17 @@ class ServerConnection:
             logger.error(e)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     def delete_user(self, username: str):
         """Delete user function. Get username param. Return dict {'success': bool, 'deleted': bool}"""
 =======
     # Send delete user request to server. Responce is json {'success': bool}
     def delete_user(self, username, password):
 >>>>>>> origin
+=======
+    def delete_user(self, username: str, password):
+        """Delete user function. Get username and password params. Return dict {'success': bool, 'deleted': bool}"""
+>>>>>>> c118d21 (Work on api sequrity)
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/delete-user', json={'username': username, 'password-hash': password_hash(password)}).text)
@@ -56,32 +61,32 @@ class ServerConnection:
             logger.error(e)
     
     # Chats actions
-    def create_chat(self, chat_name: str, chat_creator-id: int):
-        """Create chat function. Get chat_name, chat_creator params. Return dict {'success': bool, 'chat_id': int}"""
+    def create_chat(self, chat_name: str, chat_creator_id: int, password: str):
+        """Create chat function. Get chat_name, chat_creator and chat creator password params. Return dict {'success': bool, 'chat_id': int}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/create-chat',
-                json={'chat_name': chat_name, 'chat_creator': chat_creator-id}).text)
+                json={'chat_name': chat_name, 'chat_creator_id': chat_creator_id, 'password-hash': password_hash(password)}).text)
             return response
         except Exception as e:
             logger.error(e)
     
-    def delete_chat_by_name(self, chat_name: str, chat_creator: int):
-        """Delete chat by chatname function. Get chatname, chat_creator params. Return dict {'success': bool', 'deleted': bool}"""
+    def delete_chat_by_name(self, chat_name: str, chat_creator: int, password: str):
+        """Delete chat by chatname function. Get chatname, chat_creator password, params. Return dict {'success': bool', 'deleted': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/remove-chat/by-name',
-                json={'chat_name': chat_name, 'chat_creator': chat_creator}).text) 
+                json={'chat_name': chat_name, 'chat_creator_id': chat_creator, 'password-hash': password_hash(password)}).text) 
             return response
         except Exception as e:
             logger.error(e)
 
-    def delete_chat_by_id(self, id: int, chat_creator_id: int):
-        """Delete chat by id function. Get id(chat_id), chat_creator_id params. Return dict {'success': bool, 'deleted': bool}"""
+    def delete_chat_by_id(self, id: int, chat_creator_id: int, password: str):
+        """Delete chat by id function. Get id(chat_id), chat_creator_id, password params. Return dict {'success': bool, 'deleted': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/remove-chat/by-id',
-                json={'id': id, 'chat_creator': chat_creator_id}).text)
+                json={'id': id, 'chat_creator_id': chat_creator_id, 'password-hash': password_hash(password)}).text)
             return response
         except Exception as e:
             logger.error(e)
@@ -103,27 +108,29 @@ class ServerConnection:
             logger.error(e)
     
     # Message actions
-    def create_message(self, from_user: id, from_chat:id, body:str):
-        """Create message function. Get from_user, from_chat, body params. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
+    def create_message(self, from_user: id, from_chat:id, body:str, password):
+        """Create message function. Get from_user, from_chat, body, password params. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
         try:
             response = json.loads(requests.post(
-                f'{self.server_ip}/api/message/create', json={'body': body, 'from_user': from_user, 'from_chat': from_chat}).text)
+                f'{self.server_ip}/api/message/create', json={'body': body, 'from_user': from_user, 'from_chat': from_chat, 'password-hash': password_hash(password)}).text)
             return response
         except Exception as e:
             logger.error(e)
 
-    def get_message_info(self, message_id):
-        """Get message info. Get message_id param. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
+    def get_message_info(self, message_id, user_id, password):
+        """Get message info. Get message_id, user_id, password params. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
         try:
-            response = json.loads(requests.get(f'{self.server_ip}/api/message/{message_id}').text)
+            response = json.loads(requests.post(f'{self.server_ip}/api/message/info', 
+                json={'message_id': message_id, 'user_id': user_id, 'password-hash': password_hash(password)}).text)
             return response
         except Exception as e:
             logger.error(e)
     
-    def delete_message(self, message_id:int):
+    def delete_message(self, message_id:int, user_id, password):
         """Delete message function. Get message_id param. Return dict {'success': bool, 'deleted': bool}"""
         try:
-            response = json.loads(requests.get(f'{self.server_ip}/api/message/delete/{message_id}').text)
+            response = json.loads(requests.post(f'{self.server_ip}/api/message/delete', 
+                json={'message_id': message_id, 'user_id': user_id, 'password-hash': password_hash(password)}).text)
             return response
         except Exception as e:
             logger.error(e)
