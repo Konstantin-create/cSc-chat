@@ -1,7 +1,7 @@
 import requests
 import json
 from loguru import logger
-from user import password_hash
+from modules.user import password_hash
 
 
 class ServerConnection:

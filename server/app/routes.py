@@ -56,13 +56,9 @@ def _api_delete_user():
     try:
         if request.method == 'POST':
             data = request.get_json()
-<<<<<<< HEAD
-            user_to_delete = User.query.filter_by(username=data['username'], password_hash=data['password-hash']).first()
-=======
             username = data['username']
             password = data['password-hash']
             user_to_delete = User.query.filter_by(username=username, password_hash=password).first()
->>>>>>> c118d21 (Work on api sequrity)
             if user_to_delete:
                 db.session.delete(user_to_delete)
                 db.session.commit()
@@ -159,7 +155,7 @@ def _api_get_chat_info_name(chat_name):
         return {'success': False, chat: None}
 
 # Get chats from user id
-@app.route('/api/get-users-chat/<int: user_id>')
+@app.route('/api/get-users-chat/<int:user_id>')
 def _api_get_users_chat(user_id):
     try:
         chats = Chat.query.filter_by(from_user=user_id).all()

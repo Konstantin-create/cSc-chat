@@ -1,3 +1,4 @@
+import os
 import json
 from loguru import logger
 from hashlib import sha256
@@ -13,15 +14,20 @@ class User:
     def __init__(self, base_dir: str):
         self.root = base_dir
         self.cdata = f'{self.root}/cdata'
+        self.base_session = {'user': {'username': None, 'password_hash': None}}
     
     # Working with files
     def get_cdata(self):
         """Function to get all data from cdata folder. Return dict {'session': dict, 'chats': list}"""
         try:
-            with open(f'{self.cdata}/session.session', 'r') as file:
-                session = json.load(file)
-            with open(f'{self.cdata}/chats.json', 'r') as file:
-                chats = json.load(file)
+            session = None
+            chats = None
+            if os.path.exists(f'{self.cdata}/session.session'):
+                with open(f'{self.cdata}/session.session', 'r') as file:
+                    session = json.load(file)
+            if os.path.exists(f'{self.cdata}/chats.json'):
+                with open(f'{self.cdata}/chats.json', 'r') as file:
+                    chats = json.load(file)
             return {'session': session, 'chats': chats}
         except Exception as e:
             logger.error(e)
@@ -30,19 +36,29 @@ class User:
     def set_chats(self, chat_list: list):
         """Function to set chat list. Get chat_list param. Return dict {'recorded': bool}"""
         try:
-            with open(f'{self.cdata}/chats', 'w') as file:
+            with open(f'{self.cdata}/chats.json', 'w') as file:
                 json.dump(chat_list, file)
             return {'recorded': True}
         except Exception as e:
             logger.error(e)
             return {'recorded', False}
     
+    def create_session(self):
+        """Function to create empty session file"""
+        try:
+            with open(f'{self.cdata}/session.session', 'w') as file:
+                json.dump(self.base_session, file)
+            return {'created': True}
+        except Exception as e:
+            logger.error(e)
+            return {'creted': False}
+
     def set_session(self, session: dict):
         """Function to write info in session file. Get session(dict) param. Return dict {'recorded': bool}"""
         try:
-            with open(f'{self.cdata}/session', 'w') as file:
+            with open(f'{self.cdata}/session.session', 'w') as file:
                 json.dump(session, file)
-            return recorded
+            return {'recorded': True}
         except Exception as e:
             logger.error(e)
             return {'recorded': False}
@@ -51,24 +67,27 @@ class User:
     def is_logged(self):
         """Function to read cdata/session.session and get user data from threre. Return dict {'logged': bool, 'user': dict}"""
         try:
-            session = self.get_cdata()['session']
-            if ('user' in session) and ('username' in session['user']) and ('password_hash' in session['password_hash']):
-                return {'logged': True, 'user': session['user']}
+            if os.path.exists(self.cdata) and os.path.exists(f'{self.cdata}/session.session'):
+                session = self.get_cdata()['session']
+                if session['user']['username'] or session['user']['password_hash']:
+                    return {'logged': True, 'user': session['user']}
+            return {'logged': False, 'user': None}
         except Exception as e:
             logger.error(e)
-            return {'logged': False, user: None}
+            return {'logged': False, 'user': None}
 
     def login(self, username, password):
         """Function to write userdata in session file. Get username, password params. Return dict {'logged': bool, 'user': dict}"""
-        try:
-            user = {'username': username, 'password_hash': password_hash(password), 'login_time': datetime.utcnow()}
-            session = self.get_cdata()['session']
-            session['user'] = user
-            self.set_session(session)
-            return {'logged': True, 'user': user}
-        except Exception as e:
-            logger.error(e)
-            return {'logged': False}
+        # try:
+        user = {'username': username, 'password_hash': password_hash(password), 'login_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')}
+        print(user)
+        session = self.get_cdata()['session']
+        session['user'] = user
+        self.set_session(session)
+        return {'logged': True, 'user': user}
+        # except Exception as e:
+        #     logger.error(e)
+        #     return {'logged': False}
 
     def logout(self, username, password):
         """Function to logout user. Get username, password params. Return dict {'logout': bool}"""
