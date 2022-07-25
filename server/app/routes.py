@@ -12,11 +12,14 @@ def _api_signup():
             data = request.get_json()
             login = data['username']
             password_hash = data['password-hash']
-            user = User(username=login, password_hash=password_hash)
-            db.session.add(user)
-            db.session.commit()
-            return {'success': True, 'is_registered': True} # If username and password are correct
-        return {'success': True, 'is_registered': False} # If username or password is incorrect
+            if not User.query.filter_by(username=login).first():
+                logger.info(f'New user! {login}')
+                logger.info(User.query.filter_by(username=login).first())
+                user = User(username=login, password_hash=password_hash)
+                db.session.add(user)
+                db.session.commit()
+                return {'success': True, 'is_registered': True}
+            return {'success': True, 'is_registered': False} 
     except Exception as e:
         logger.error(f'Error in user signup block: {e}')
         return {'success': False, 'is_registered': None}
@@ -48,6 +51,20 @@ def _api_check_login(login):
     except Exception as e:
         logger.error(f'Error in check username block: {e}')
         return {'success': False, 'is_free': None}
+
+# Get username by id
+@app.route('/api/get-user-id/by-username', methods=['GET', 'POST'])
+def get_user_id():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            user = User.query.filter_by(username=data['username'], password_hash=data['password-hash']).first()
+            if user:
+                return {'success': True, 'user_id': user.id}
+            return {'success': True, 'user_id': None}
+    except Exception as e:
+        logger.error(f'Error in get user id block: {e}')
+        return {'success': False, 'user_id': None}
 
 
 # Delete user

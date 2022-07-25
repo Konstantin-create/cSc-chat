@@ -41,6 +41,15 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
+    def get_id_by_username(self, username, password):
+        """Get user id by username function. Get username and password params. Return dict {'success': bool, 'user_id': int}"""
+        try:
+            response = json.loads(requests.post(
+                f'{self.server_ip}/api/get-user-id/by-username', json={'username': username, 'password-hash': password_hash(password)}).text)
+            return response
+        except Exception as e:
+            logger.error(e)
+
     def delete_user(self, username: str, password):
         """Delete user function. Get username and password params. Return dict {'success': bool, 'deleted': bool}"""
         try:
@@ -97,9 +106,18 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
     
+    def get_user_chats(self, user_id):
+        """Function to get user chats by id. Get user_id param. Return dict {'success': bool, 'chats': list}"""
+        try:
+            response = json.loads(requests.get(f'{self.server_ip}/api/get-users-chat/{user_id}').text)
+            return response
+        except Exception as e:
+            logger.error(e)
+    
     # Message actions
     def create_message(self, from_user: id, from_chat:id, body:str, password):
-        """Create message function. Get from_user, from_chat, body, password params. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
+        """Create message function. Get from_user, from_chat, body, password params.
+        Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/message/create', json={'body': body, 'from_user': from_user, 'from_chat': from_chat, 'password-hash': password_hash(password)}).text)
@@ -108,7 +126,8 @@ class ServerConnection:
             logger.error(e)
 
     def get_message_info(self, message_id, user_id, password):
-        """Get message info. Get message_id, user_id, password params. Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
+        """Get message info. Get message_id, user_id, password params.
+        Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}}"""
         try:
             response = json.loads(requests.post(f'{self.server_ip}/api/message/info', 
                 json={'message_id': message_id, 'user_id': user_id, 'password-hash': password_hash(password)}).text)
@@ -126,7 +145,8 @@ class ServerConnection:
             logger.error(e)
 
     def get_chat_messages(self, chat_id:int):
-        """Get all chat messages. Get chat_id param. Return dict {'success': bool, messages: [{'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}, ...]}"""
+        """Get all chat messages. Get chat_id param.
+        Return dict {'success': bool, messages: [{'id': int, 'from_user': int, 'from_chat': int, 'body': str, 'time_stamp': obj(datetime)}, ...]}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/messages/all/chat-id/{chat_id}').text)
             return response

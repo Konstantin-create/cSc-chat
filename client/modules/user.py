@@ -14,24 +14,24 @@ class User:
     def __init__(self, base_dir: str):
         self.root = base_dir
         self.cdata = f'{self.root}/cdata'
-        self.base_session = {'user': {'username': None, 'password_hash': None}}
+        self.base_session = {'user': {'id': None, 'username': None, 'password_hash': None}}
     
     # Working with files
     def get_cdata(self):
         """Function to get all data from cdata folder. Return dict {'session': dict, 'chats': list}"""
-        try:
-            session = None
-            chats = None
-            if os.path.exists(f'{self.cdata}/session.session'):
-                with open(f'{self.cdata}/session.session', 'r') as file:
-                    session = json.load(file)
-            if os.path.exists(f'{self.cdata}/chats.json'):
-                with open(f'{self.cdata}/chats.json', 'r') as file:
-                    chats = json.load(file)
-            return {'session': session, 'chats': chats}
-        except Exception as e:
-            logger.error(e)
-            return {'session': None, 'chats': None}
+        # try:
+        session = None
+        chats = None
+        if os.path.exists(f'{self.cdata}/session.session'):
+            with open(f'{self.cdata}/session.session', 'r') as file:
+                session = json.load(file)
+        if os.path.exists(f'{self.cdata}/chats.json'):
+            with open(f'{self.cdata}/chats.json', 'r') as file:
+                chats = json.load(file)
+        return {'session': session, 'chats': chats}
+        # except Exception as e:
+        #     logger.error(e)
+        #     return {'session': None, 'chats': None}
     
     def set_chats(self, chat_list: list):
         """Function to set chat list. Get chat_list param. Return dict {'recorded': bool}"""
@@ -66,28 +66,28 @@ class User:
     # Login/registration routes
     def is_logged(self):
         """Function to read cdata/session.session and get user data from threre. Return dict {'logged': bool, 'user': dict}"""
-        try:
-            if os.path.exists(self.cdata) and os.path.exists(f'{self.cdata}/session.session'):
-                session = self.get_cdata()['session']
-                if session['user']['username'] or session['user']['password_hash']:
-                    return {'logged': True, 'user': session['user']}
-            return {'logged': False, 'user': None}
-        except Exception as e:
-            logger.error(e)
-            return {'logged': False, 'user': None}
-
-    def login(self, username, password):
-        """Function to write userdata in session file. Get username, password params. Return dict {'logged': bool, 'user': dict}"""
         # try:
-        user = {'username': username, 'password_hash': password_hash(password), 'login_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')}
-        print(user)
-        session = self.get_cdata()['session']
-        session['user'] = user
-        self.set_session(session)
-        return {'logged': True, 'user': user}
+        if os.path.exists(self.cdata) and os.path.exists(f'{self.cdata}/session.session'):
+            session = self.get_cdata()['session']
+            if session['user']['username'] or session['user']['password_hash']:
+                return {'logged': True, 'user': session['user']}
+        return {'logged': False, 'user': None}
         # except Exception as e:
         #     logger.error(e)
-        #     return {'logged': False}
+        #     return {'logged': False, 'user': None}
+
+    def login(self, user_id, username, password):
+        """Function to write userdata in session file. Get username, password params. Return dict {'logged': bool, 'user': dict}"""
+        try:
+            user = {'id': user_id, 'username': username, 'password_hash': password_hash(password), 'login_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')}
+            print(user)
+            session = self.get_cdata()['session']
+            session['user'] = user
+            self.set_session(session)
+            return {'logged': True, 'user': user}
+        except Exception as e:
+            logger.error(e)
+            return {'logged': False}
 
     def logout(self, username, password):
         """Function to logout user. Get username, password params. Return dict {'logout': bool}"""
