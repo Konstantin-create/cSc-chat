@@ -175,7 +175,7 @@ def _api_get_chat_info_name(chat_name):
 @app.route('/api/get-users-chat/<int:user_id>')
 def _api_get_users_chat(user_id):
     try:
-        chats = Chat.query.filter_by(from_user=user_id).all()
+        chats = Chat.query.filter_by(chat_creator=user_id).all()
         if chats:
             return {'success': True, 'chats': chats}
         return {'success': True, 'chats': None}
