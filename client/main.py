@@ -44,8 +44,8 @@ def logged():
             print('User chats: ')
         else:
             print('User chat: ')
-        for chat in responce['chats']:
-            print(f'{chat["chat_name"]} - chat["id"]'
+        for i in range(len(responce['chats'])):
+            print(f"{i} - {responce['chats'][i]['chat_name']}")
     else:
         print('This user have no chats')
         if int(input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n~ ')) - 1:
