@@ -60,12 +60,12 @@ class ServerConnection:
             logger.error(e)
     
     # Chats actions
-    def create_chat(self, chat_name: str, chat_creator_id: int, password: str):
-        """Create chat function. Get chat_name, chat_creator and chat creator password params. Return dict {'success': bool, 'chat_id': int}"""
+    def create_chat(self, chat_name: str, chat_creator_id: int, password_hash: str):
+        """Create chat function. Get chat_name, chat_creator and chat creator password_hash params. Return dict {'success': bool, 'chat_id': int}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/create-chat',
-                json={'chat_name': chat_name, 'chat_creator_id': chat_creator_id, 'password-hash': password_hash(password)}).text)
+                json={'chat_name': chat_name, 'chat_creator_id': chat_creator_id, 'password-hash': password_hash}).text)
             return response
         except Exception as e:
             logger.error(e)

@@ -93,15 +93,16 @@ def _api_create_chat():
     try:
         if request.method == 'POST':
             data = request.get_json()
+            logger.info(data)
             if User.query.filter_by(id=data['chat_creator_id'], password_hash=data['password-hash']).first():
                 new_chat = Chat(chat_name=data['chat_name'], chat_creator=data['chat_creator_id'])
                 db.session.add(new_chat)
                 db.session.commit()
-                return {'success': True, 'chat_id': new_chat.id}
-        return {'success': True, 'chat_id': None}
+                return {'success': True, 'chat': {'id': new_chat.id, 'chat_name': new_chat.chat_name, 'chat_creator_id': new_chat.chat_creator}}
+        return {'success': True, 'chat': None}
     except Exception as e:
         logger.error(f'Error in create chat block: {e}')
-        return {'success': False, 'chat_id': None}
+        return {'success': False, 'chat': None}
 
 
 # Remove chat by id
@@ -153,31 +154,34 @@ def _api_get_chat_info_id(chat_id):
         chat = Chat.query.filter_by(id=chat_id).first()
         if chat:
             return {'success': True, 'chat': {'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator_id': chat.chat_creator}}
-        return {'success': True, chat: None}
+        return {'success': True, 'chat': None}
     except Exception as e:
         logger.error(f'Error in get-chat-info by id block: {e}')
-        return {'success': False, chat: None}
+        return {'success': False, 'chat': None}
 
 # Get chat info by chat name
 @app.route('/api/get-chat-info/by-name/<string:chat_name>')
 def _api_get_chat_info_name(chat_name):
     try:
         chat = Chat.query.filter_by(chat_name=chat_name).first()
-        print(chat)
-        if chat:
-            return {'success': True, 'chat': {'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator_id': chat.chat_creator}}
-        return {'success': True, chat: None}
+        print(chat is None)
+        if not (chat is None):
+            return {'success': True, 'chat': {'id': chat.id, 'chat_name': chat.chat_name, 'chat_creator_id': chat.chat_creator}}
+        return {'success': True, 'chat': None}
     except Exception as e:
         logger.error(f'Error in get-chat-info by name block: {e}')
-        return {'success': False, chat: None}
+        return {'success': False, 'chat': None}
 
 # Get chats from user id
 @app.route('/api/get-users-chat/<int:user_id>')
 def _api_get_users_chat(user_id):
     try:
         chats = Chat.query.filter_by(chat_creator=user_id).all()
+        output_chats = []
         if chats:
-            return {'success': True, 'chats': chats}
+            for chat in chats:
+                output_chats.append({'id': chat.id, 'chat_name': chat.chat_name, 'creator_id': chat.chat_creator})
+            return {'success': True, 'chats': output_chats}
         return {'success': True, 'chats': None}
     except Exception as e:
         logger.error(f'Error in get_users_chat block: {e}')

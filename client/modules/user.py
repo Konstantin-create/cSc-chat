@@ -19,19 +19,19 @@ class User:
     # Working with files
     def get_cdata(self):
         """Function to get all data from cdata folder. Return dict {'session': dict, 'chats': list}"""
-        # try:
-        session = None
-        chats = None
-        if os.path.exists(f'{self.cdata}/session.session'):
-            with open(f'{self.cdata}/session.session', 'r') as file:
-                session = json.load(file)
-        if os.path.exists(f'{self.cdata}/chats.json'):
-            with open(f'{self.cdata}/chats.json', 'r') as file:
-                chats = json.load(file)
-        return {'session': session, 'chats': chats}
-        # except Exception as e:
-        #     logger.error(e)
-        #     return {'session': None, 'chats': None}
+        try:
+            session = None
+            chats = None
+            if os.path.exists(f'{self.cdata}/session.session'):
+                with open(f'{self.cdata}/session.session', 'r') as file:
+                    session = json.load(file)
+            if os.path.exists(f'{self.cdata}/chats.json'):
+                with open(f'{self.cdata}/chats.json', 'r') as file:
+                    chats = json.load(file)
+            return {'session': session, 'chats': chats}
+        except Exception as e:
+            logger.error(e)
+            return {'session': None, 'chats': None}
     
     def set_chats(self, chat_list: list):
         """Function to set chat list. Get chat_list param. Return dict {'recorded': bool}"""
@@ -42,6 +42,20 @@ class User:
         except Exception as e:
             logger.error(e)
             return {'recorded', False}
+
+    def add_chat_to_chats(chat: dict):
+        try:
+            current_chats = self.get_cdata()['chats']
+            if current_chats is None:
+                self.set_chats([chat])
+                return {'added': True}
+            current_chats.append(chat)
+            self.set_chats(current_chats)
+            return {'added': True}
+            pass # todo добавление алемента в список чатов.
+        except Exception as e:
+            logger.error(e)
+            return {'added': False}
     
     def create_session(self):
         """Function to create empty session file"""

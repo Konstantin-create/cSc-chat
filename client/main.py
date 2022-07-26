@@ -19,24 +19,33 @@ def clear_screen():
     elif sys.platform == "win32":
         os.system('cls')
 
+
 def not_logged():
-    command = int(input("""Until you are logged into your account. Select menu item\n    1 - Login\n    2 - Registration\n~ """))
-    if command-1:
+    command = int(
+        input("""Until you are logged into your account. Select menu item\n    1 - Login\n    2 - Registration\n~ """))
+    if command - 1:
         clear_screen()
         registration()
     else:
         clear_screen()
         login()
 
+
 def logged():
     user = user_obj.is_logged()
+    print(f"Logged as {user['user']['username']}")
+    print()
     responce = connection.get_user_chats(user['user']['id'])
     if not responce['success']:
         print('A server error occured. Try 2 minutes later')
         sys.exit()
     if responce['chats']:
-        for chat in chats:
-            print(chat)
+        if len(responce['chats']) > 1:
+            print('User chats: ')
+        else:
+            print('User chat: ')
+        for chat in responce['chats']:
+            print(f'{chat["chat_name"]} - chat["id"]'
     else:
         print('This user have no chats')
         if int(input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n~ ')) - 1:
@@ -52,7 +61,7 @@ def login():
     if responce:
         if responce['success'] and responce['logged']:
             responce_id = connection.get_id_by_username(username, password)
-            if responce_id and responce_id['success']: 
+            if responce_id and responce_id['success']:
                 user_obj.login(responce_id['user_id'], username, password)
                 print('Restart program')
                 sys.exit()
@@ -67,13 +76,15 @@ def login():
         print('An error occured. Try again later')
     login()
 
+
 def registration():
-    username = str(input('Enter username: ')) 
+    username = str(input('Enter username: '))
     password1 = str(getpass('Enter password: '))
     password2 = str(getpass('Repeat password: '))
     if password1 == password2:
         clear_screen()
-        if not (int(input(f'Is everything right?\n    Username:{username}\n    Password:{password1}\n1 - Yes\n2- No\n~ ')) - 1):
+        if not (int(input(
+                f'Is everything right?\n    Username:{username}\n    Password:{password1}\n1 - Yes\n2- No\n~ ')) - 1):
             responce = connection.registration(username, password1)
             if responce:
                 responce_id = connection.get_id_by_username(username, password1)
@@ -100,12 +111,22 @@ def registration():
         print('Password doest match try again!')
     registration()
 
+
 def create_chat():
     chat_name = input('Enter chat name: ').strip()
-    if server.get_chat_info_by_name(chat_name)['chat']:
+    user = user_obj.is_logged()['user']
+    if connection.get_chat_info_by_name(chat_name)['chat']:
         clear_screen()
         print('This chat name is already taken. Try anouther')
         create_chat()
+    else:
+        responce = connection.create_chat(chat_name, user['id'], user['password_hash'])
+        if responce['success']:
+            if responce['chat']:
+                print('Chat has been created')
+                user_obj.add_chat_to_chats(responce['chat'])
+                return
+        print('An server error occured. Try again later')
 
 if not os.path.exists(f'{base_dir}/cdata/session.session') or len(open(f'{base_dir}/cdata/session.session').read()) < 1:
     user_obj.create_session()
@@ -117,4 +138,4 @@ while True:
         logged()
         break
     else:
-        not_logged() 
+        not_logged()
