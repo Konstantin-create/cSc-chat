@@ -34,3 +34,12 @@ class Message(db.Model):
 
     def __repr__(self):
         return f'<Message | Chat: {self.from_chat} | User: {self.from_user}>'
+    
+
+class Subscribe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+
+    def __repr__(self):
+        return f'<Subscribe {self.user_id} - {self.chat_id}>'
