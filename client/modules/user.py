@@ -43,8 +43,9 @@ class User:
             logger.error(e)
             return {'recorded', False}
 
-    def add_chat_to_chats(chat: dict):
+    def add_chat_to_chats(self, chat: dict):
         try:
+            print(chat)
             current_chats = self.get_cdata()['chats']
             if current_chats is None:
                 self.set_chats([chat])
@@ -52,7 +53,6 @@ class User:
             current_chats.append(chat)
             self.set_chats(current_chats)
             return {'added': True}
-            pass # todo добавление алемента в список чатов.
         except Exception as e:
             logger.error(e)
             return {'added': False}

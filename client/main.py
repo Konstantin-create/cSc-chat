@@ -35,6 +35,7 @@ def logged():
     user = user_obj.is_logged()
     print(f"Logged as {user['user']['username']}")
     print()
+    print()
     responce = connection.get_user_chats(user['user']['id'])
     if not responce['success']:
         print('A server error occured. Try 2 minutes later')
@@ -46,7 +47,21 @@ def logged():
             print('User chat: ')
         for i in range(len(responce['chats'])):
             print(f"{i} - {responce['chats'][i]['chat_name']}")
+        user_obj.set_chats(responce['chats'])
+        print()
+        print(f"d - delete chat")
+        print(f"e - exit")
+        command = input('~ ')
+        if command is int:
+            pass  # Вывод сообщений чата
+        else:
+            if command.lower().strip() == 'd':
+                clear_screen()
+                delete_chat_menu()
+            if command.lower().strip() == 'e':
+                sys.exit()
     else:
+        user_obj.set_chats([])
         print('This user have no chats')
         if int(input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n~ ')) - 1:
             pass  # Function to join chat
@@ -124,9 +139,30 @@ def create_chat():
         if responce['success']:
             if responce['chat']:
                 print('Chat has been created')
+                print(responce['chat'])
                 user_obj.add_chat_to_chats(responce['chat'])
                 return
         print('An server error occured. Try again later')
+
+def delete_chat_menu():
+    user = user_obj.is_logged()
+    responce = connection.get_user_chats(user['user']['id'])
+    for i in range(len(responce['chats'])):
+        print(f'{i} - {responce["chats"][i]["chat_name"]}')
+    command = input('\nEnter chat number from list(b - to go back): ')
+    if command.isdigit() and int(command) <= len(responce["chats"])+1:
+        print(responce['chats'][int(command)])
+        connection.delete_chat_by_name(responce['chats'][int(command)]['chat_name'], user['user']['id'], user['user']['password_hash'])
+        sys.exit()
+    elif command.lower().strip() == 'b':
+        clear_screen()
+        logged()
+    else:
+        clear_screen()
+        print('Enter number!')
+        print()
+        delete_chat_menu()
+
 
 if not os.path.exists(f'{base_dir}/cdata/session.session') or len(open(f'{base_dir}/cdata/session.session').read()) < 1:
     user_obj.create_session()

@@ -1,3 +1,4 @@
+import sys
 import requests
 import json
 from loguru import logger
@@ -19,6 +20,9 @@ class ServerConnection:
                 json={'username': username, 'password-hash': password_hash(password)}
             ).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
@@ -30,6 +34,9 @@ class ServerConnection:
                 json={'username': username, 'password-hash': password_hash(password)}
             ).text)
             return resource
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
     
@@ -38,6 +45,9 @@ class ServerConnection:
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/check-login/{username}').text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
@@ -47,6 +57,9 @@ class ServerConnection:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/get-user-id/by-username', json={'username': username, 'password-hash': password_hash(password)}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
@@ -56,6 +69,9 @@ class ServerConnection:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/delete-user', json={'username': username, 'password-hash': password_hash(password)}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
     
@@ -67,9 +83,12 @@ class ServerConnection:
                 f'{self.server_ip}/api/create-chat',
                 json={'chat_name': chat_name, 'chat_creator_id': chat_creator_id, 'password-hash': password_hash}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
-    
+        
     def delete_chat_by_name(self, chat_name: str, chat_creator: int, password: str):
         """Delete chat by chatname function. Get chatname, chat_creator password, params. Return dict {'success': bool', 'deleted': bool}"""
         try:
@@ -77,6 +96,9 @@ class ServerConnection:
                 f'{self.server_ip}/api/remove-chat/by-name',
                 json={'chat_name': chat_name, 'chat_creator_id': chat_creator, 'password-hash': password_hash(password)}).text) 
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
@@ -87,30 +109,42 @@ class ServerConnection:
                 f'{self.server_ip}/api/remove-chat/by-id',
                 json={'id': id, 'chat_creator_id': chat_creator_id, 'password-hash': password_hash(password)}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
-            logger.error(e)
+            logger.error(e)        
 
     def get_chat_info_by_id(self, chat_id: id):
         """Get chat info by id function. Get chat_id param. Return dict {'success': bool, 'chat': {'id': int, 'chat_name': str, 'chat_creator': str}}"""
         try: 
             response = json.loads(requests.get(f'{self.server_ip}/api/get-chat-info/by-id/{chat_id}').text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
-        
+
     def get_chat_info_by_name(self, chat_name: str):
         """Get chat info by chat_name function. Get chat_name param. Return dict {'success': bool, 'chat': {'id': int, 'chat_name': str, 'chat_creator': str}}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/get-chat-info/by-name/{chat_name}').text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
-    
+
     def get_user_chats(self, user_id):
         """Function to get user chats by id. Get user_id param. Return dict {'success': bool, 'chats': list}"""
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/get-users-chat/{user_id}').text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
     
@@ -122,6 +156,9 @@ class ServerConnection:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/message/create', json={'body': body, 'from_user': from_user, 'from_chat': from_chat, 'password-hash': password_hash(password)}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
@@ -132,6 +169,9 @@ class ServerConnection:
             response = json.loads(requests.post(f'{self.server_ip}/api/message/info', 
                 json={'message_id': message_id, 'user_id': user_id, 'password-hash': password_hash(password)}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
     
@@ -141,6 +181,9 @@ class ServerConnection:
             response = json.loads(requests.post(f'{self.server_ip}/api/message/delete', 
                 json={'message_id': message_id, 'user_id': user_id, 'password-hash': password_hash(password)}).text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
@@ -150,6 +193,9 @@ class ServerConnection:
         try:
             response = json.loads(requests.get(f'{self.server_ip}/api/messages/all/chat-id/{chat_id}').text)
             return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
         except Exception as e:
             logger.error(e)
 
