@@ -33,40 +33,45 @@ def not_logged():
 
 def logged():
     user = user_obj.is_logged()
-    print(f"Logged as {user['user']['username']}")
-    print()
-    print()
-    responce = connection.get_user_chats(user['user']['id'])
-    if not responce['success']:
-        print('A server error occured. Try 2 minutes later')
-        sys.exit()
-    if responce['chats']:
-        if len(responce['chats']) > 1:
-            print('User chats: ')
-        else:
-            print('User chat: ')
-        for i in range(len(responce['chats'])):
-            print(f"{i} - {responce['chats'][i]['chat_name']}")
-        user_obj.set_chats(responce['chats'])
+    if connection.check_session(user['user']['id'], user['user']['username'], user['user']['password_hash'])['logged']: 
+        print(f"Logged as {user['user']['username']}")
         print()
-        print(f"d - delete chat")
-        print(f"e - exit")
-        command = input('~ ')
-        if command is int:
-            pass  # Вывод сообщений чата
+        print()
+        responce = connection.get_user_chats(user['user']['id'])
+        if not responce['success']:
+            print('A server error occured. Try 2 minutes later')
+            sys.exit()
+        if responce['chats']:
+            if len(responce['chats']) > 1:
+                print('User chats: ')
+            else:
+                print('User chat: ')
+            for i in range(len(responce['chats'])):
+                print(f"{i} - {responce['chats'][i]['chat_name']}")
+            user_obj.set_chats(responce['chats'])
+            print()
+            print(f"d - delete chat")
+            print(f"e - exit")
+            command = input('~ ')
+            if command is int:
+                pass  # Вывод сообщений чата
+            else:
+                if command.lower().strip() == 'd':
+                    clear_screen()
+                    delete_chat_menu()
+                if command.lower().strip() == 'e':
+                    sys.exit()
         else:
-            if command.lower().strip() == 'd':
-                clear_screen()
-                delete_chat_menu()
-            if command.lower().strip() == 'e':
-                sys.exit()
+            user_obj.set_chats([])
+            print('This user have no chats')
+            if int(input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n~ ')) - 1:
+                pass  # Function to join chat
+            else:
+                create_chat()
     else:
-        user_obj.set_chats([])
-        print('This user have no chats')
-        if int(input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n~ ')) - 1:
-            pass  # Function to join chat
-        else:
-            create_chat()
+        user_obj.logout()
+        not_logged()
+        
 
 
 def login():

@@ -51,6 +51,18 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
+    def check_session(self, id: int, username: str, password_hash: str):
+        """Function to check cdata/session.session data. Get id, username, password_hash. Return dict {'success': bool, 'logged': bool}"""
+        try:
+            response = json.loads(requests.post(
+                f'{self.server_ip}/api/check-session', json={'id': id, 'username': username, 'password_hash': password_hash}).text)
+            return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
+        except Exception as e:
+            logger.error(e)
+
     def get_id_by_username(self, username, password):
         """Get user id by username function. Get username and password params. Return dict {'success': bool, 'user_id': int}"""
         try:

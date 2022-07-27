@@ -103,16 +103,12 @@ class User:
             logger.error(e)
             return {'logged': False}
 
-    def logout(self, username, password):
-        """Function to logout user. Get username, password params. Return dict {'logout': bool}"""
+    def logout(self):
+        """Function to logout user. Return dict {'logout': bool}"""
         try:
             session = self.get_cdata()['session']
             if 'user' in session:
-                if session['user']['username'] == username and session['user']['password'] == password_hash(password):
-                    del session['user']
-                else:
-                    logger.warning('Wrong username or password')
-                    return {'logout': False}
+                del session['user']
             return {'logout': True}
         except Exception as e:
             logger.error(e)

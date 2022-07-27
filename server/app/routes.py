@@ -52,6 +52,22 @@ def _api_check_login(login):
         logger.error(f'Error in check username block: {e}')
         return {'success': False, 'is_free': None}
 
+
+# Check client local session
+@app.route('/api/check-session', methods=['GET', 'POST'])
+def check_user_session():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            user = User.query.filter_by(id=data['id'], username=data['username'], password_hash=data['password_hash']).first()
+            if user:
+                return {'success': True, 'logged': True}
+        return {'success': True, 'logged': False}
+    except Exception as e:
+        logger.error(f'Error in check client local session block: {e}')
+        return {'success': False, 'logged': False}
+
+
 # Get username by id
 @app.route('/api/get-user-id/by-username', methods=['GET', 'POST'])
 def get_user_id():
