@@ -1,6 +1,6 @@
 from app import app, request, db
 from loguru import logger
-from app.models import User, Chat, Message
+from app.models import User, Chat, Message, Subscribe
 
 
 # User routes
@@ -253,3 +253,61 @@ def _api_get_chat_messages(chat_id):
         logger.error(f'Error in get chat messages block: {e}')
         return {'success': False, 'messages': None}
 
+
+# User subscriptions routes
+# Add user subscriptions
+@app.route('/api/user-subscriptions/add', methods=['GET', 'POST'])
+def add_user_subscriptions():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            user = User.query.filter_by(id=data['user_id'], password_hash=data['password_hash']).first()
+            if user:
+                subscription = Subscribe(chat_id=data['chat_id'], user_id=user.id)
+                db.session.add(subscription)
+                db.session.commit()
+                return {'success': True, 'added': True}
+            return {'success': True, 'added': False}
+    except Exception as e:
+        logger.error(f'Error in add user subscription block: {e}')
+        return {'success': False, 'added': False}
+
+# Get user subscriptions
+@app.route('/api/user-subscriptions/get', methods=['GET', 'POST'])
+def get_user_subscriptions():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            chats_output = []
+            user = User.query.filter_by(id=data['user_id'], password_hash=data['password_hash']).first()
+            if user:
+                subscriptions = Subscribe.query.filter_by(user_id=user.id).all()
+                if subscriptions:
+                    for subscription in subscriptions:
+                        chat = Chat.query.filter_by(id=subscription.chat_id)
+                        chats_output.append({'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator_id': chat.chat_creator})
+                    return {'success': True, 'chats': None}
+                return {'success': True, 'chats': []}
+        return {'success': True, 'chats': None}
+    except Exception as e:
+        logger.error(f'Error in get user subscriptions block: {e}')
+        return {'success': False, 'chats': None}
+
+# Delete user subscription
+@app.route('/api/user-subscriptions/delete', methods=['GET', 'POST'])
+def delete_user_subscription():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            user = User.query.filter_by(id=data['user_id'], password_hash=data['password_hash']).first()
+            if user:
+                subscription = Subscribe.query.filter_by(user_id, data['chat_id']).first()
+                if subscription:
+                    db.session.delete(subscription)
+                    db.session.commit()
+                    return {'success': True, 'deleted': True}
+        return {'success': True, 'deleted': False}
+    except Exception as e:
+        logger.error(f'Error in delete user subscription block: {e}')
+        return {'success': False, 'deleted': False}
+    
