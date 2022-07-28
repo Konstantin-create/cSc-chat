@@ -51,6 +51,7 @@ def logged():
             user_obj.set_chats(responce['chats'])
             print()
             print('j - join chat by id')
+            print('s - show user subscibtions')
             print("d - delete chat")
             print("e - exit")
             print("l - logout from device")
@@ -68,7 +69,7 @@ def logged():
                 while True:
                     chanel_to_sub = input('Enter chat id to join(b - back):')
                     if chanel_to_sub.isdigit():
-                        print(connection.subscribe_chanel(int(chanel_to_sub), user['user']['id'], user['user']['password_hash']))
+                        print(connection.subscribe_chat(int(chanel_to_sub), user['user']['id'], user['user']['password_hash']))
                         break
                     elif chanel_to_sub.lower().strip() == 'b':
                         clear_screen()
@@ -78,6 +79,8 @@ def logged():
                         clear_screen()
                         print('Enter chat id or "b" to back!')
                         print()
+            elif command.lower().strip() == 's':
+                user_subscribtions()
             else:
                 clear_screen()
                 logged()
@@ -194,6 +197,33 @@ def delete_chat_menu():
         print('Enter number!')
         print()
         delete_chat_menu()
+
+
+def user_subscribtions():
+    clear_screen()
+    user = user_obj.is_logged()
+    responce = connection.get_user_subscriptions(user['user']['id'], user['user']['password_hash'])
+    if not responce['success']:
+        print('A server error occured! Try again later')
+    elif responce['chats']:
+        print('User chats:\n')
+        for i in range(len(responce['chats'])):
+            print(f'{i} - {responce["chats"][i]["chat_name"]}')
+        print()
+        print('Enter chat number to print messages')
+    else:
+        print('This user have no subscibtions!')
+    print()
+    print('b - back')
+    command = input('~ ')
+    if command.isdigit():
+        if int(command) <= len(responce['chats']):
+            pass # Todo print messages
+    elif command.lower().strip() == 'b':
+        clear_screen()
+        logged()
+    else:
+        user_subscribtions()
 
 
 if not os.path.exists(f'{base_dir}/cdata/session.session') or len(open(f'{base_dir}/cdata/session.session').read()) < 1:

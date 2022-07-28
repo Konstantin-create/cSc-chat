@@ -255,7 +255,7 @@ class ServerConnection:
                     print()
                 else:
                     responce = json.loads(requests.post(
-                        f'{self.server_ip}/api/user-subscription/delete', json={'user_id': current_user_id, 'password_hash': password_hash, 'chat_id0: chat_id'}).text)
+                        f'{self.server_ip}/api/user-subscription/delete', json={'user_id': current_user_id, 'password_hash': password_hash, 'chat_id': chat_id}).text)
                     return responce
         except requests.exceptions.ConnectionError:
             logger.error('No internet connection! Try later')

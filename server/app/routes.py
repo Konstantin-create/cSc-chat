@@ -279,7 +279,7 @@ def add_user_subscriptions():
             data = request.get_json()
             user = User.query.filter_by(id=data['user_id'], password_hash=data['password_hash']).first()
             if user:
-                if not Subscribe.query.filter_by(chat_id=data['chat_id'], user_id=user.id):
+                if not Subscribe.query.filter_by(chat_id=data['chat_id'], user_id=user.id).first():
                     subscription = Subscribe(chat_id=data['chat_id'], user_id=user.id)
                     db.session.add(subscription)
                     db.session.commit()
@@ -301,9 +301,9 @@ def get_user_subscriptions():
                 subscriptions = Subscribe.query.filter_by(user_id=user.id).all()
                 if subscriptions:
                     for subscription in subscriptions:
-                        chat = Chat.query.filter_by(id=subscription.chat_id)
+                        chat = Chat.query.filter_by(id=subscription.chat_id).first()
                         chats_output.append({'id': chat.id, 'chat_name':chat.chat_name, 'chat_creator_id': chat.chat_creator})
-                    return {'success': True, 'chats': None}
+                    return {'success': True, 'chats': chats_output}
                 return {'success': True, 'chats': []}
         return {'success': True, 'chats': None}
     except Exception as e:
