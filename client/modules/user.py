@@ -80,15 +80,17 @@ class User:
     # Login/registration routes
     def is_logged(self):
         """Function to read cdata/session.session and get user data from threre. Return dict {'logged': bool, 'user': dict}"""
-        # try:
-        if os.path.exists(self.cdata) and os.path.exists(f'{self.cdata}/session.session'):
-            session = self.get_cdata()['session']
-            if session['user']['username'] or session['user']['password_hash']:
-                return {'logged': True, 'user': session['user']}
-        return {'logged': False, 'user': None}
-        # except Exception as e:
-        #     logger.error(e)
-        #     return {'logged': False, 'user': None}
+        try:
+            if os.path.exists(self.cdata) and os.path.exists(f'{self.cdata}/session.session'):
+                session = self.get_cdata()['session']
+                if session['user']['username'] or session['user']['password_hash']:
+                    return {'logged': True, 'user': session['user']}
+            return {'logged': False, 'user': None}
+        except KeyError:
+            return {'logged': False, 'user': None}
+        except Exception as e:
+            logger.error(e)
+            return {'logged': False, 'user': None}
 
     def login(self, user_id, username, password):
         """Function to write userdata in session file. Get username, password params. Return dict {'logged': bool, 'user': dict}"""
@@ -106,9 +108,11 @@ class User:
     def logout(self):
         """Function to logout user. Return dict {'logout': bool}"""
         try:
-            session = self.get_cdata()['session']
-            if 'user' in session:
-                del session['user']
+            cdata = self.get_cdata()
+            if 'user' in cdata['session']:
+                self.set_session({'user': {}})
+            if cdata['chats']:
+                self.set_chats([])
             return {'logout': True}
         except Exception as e:
             logger.error(e)

@@ -50,24 +50,51 @@ def logged():
                 print(f"{i} - {responce['chats'][i]['chat_name']}")
             user_obj.set_chats(responce['chats'])
             print()
-            print(f"d - delete chat")
-            print(f"e - exit")
+            print('j - join chat by id')
+            print("d - delete chat")
+            print("e - exit")
+            print("l - logout from device")
             command = input('~ ')
-            if command is int:
+            if command.isdigit():
                 pass  # Вывод сообщений чата
+            elif command.lower().strip() == 'd':
+                clear_screen()
+                delete_chat_menu()
+            elif command.lower().strip() == 'e':
+                sys.exit()
+            elif command.lower().strip() == 'l':
+                user_obj.logout()
+            elif command.lower().strip() == 'j':
+                while True:
+                    chanel_to_sub = input('Enter chat id to join(b - back):')
+                    if chanel_to_sub.isdigit():
+                        print(connection.subscribe_chanel(int(chanel_to_sub), user['user']['id'], user['user']['password_hash']))
+                        break
+                    elif chanel_to_sub.lower().strip() == 'b':
+                        clear_screen()
+                        logged()
+                        break
+                    else:
+                        clear_screen()
+                        print('Enter chat id or "b" to back!')
+                        print()
             else:
-                if command.lower().strip() == 'd':
-                    clear_screen()
-                    delete_chat_menu()
-                if command.lower().strip() == 'e':
-                    sys.exit()
+                clear_screen()
+                logged()
         else:
             user_obj.set_chats([])
             print('This user have no chats')
-            if int(input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n~ ')) - 1:
-                pass  # Function to join chat
-            else:
-                create_chat()
+            command = input('Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\ne - exit\nl - logout from devise\n~ ')
+            if command.isdigit():
+                if int(command) - 1:
+                    pass  # Function to join chat
+                else:
+                    clear_screen()
+                    create_chat()
+            elif command.lower().strip() == 'e':
+                sys.exit()
+            elif command.lower().strip() == 'l':
+                user_obj.logout()
     else:
         user_obj.logout()
         not_logged()

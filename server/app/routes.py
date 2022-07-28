@@ -279,11 +279,12 @@ def add_user_subscriptions():
             data = request.get_json()
             user = User.query.filter_by(id=data['user_id'], password_hash=data['password_hash']).first()
             if user:
-                subscription = Subscribe(chat_id=data['chat_id'], user_id=user.id)
-                db.session.add(subscription)
-                db.session.commit()
-                return {'success': True, 'added': True}
-            return {'success': True, 'added': False}
+                if not Subscribe.query.filter_by(chat_id=data['chat_id'], user_id=user.id):
+                    subscription = Subscribe(chat_id=data['chat_id'], user_id=user.id)
+                    db.session.add(subscription)
+                    db.session.commit()
+                    return {'success': True, 'added': True}
+        return {'success': True, 'added': False}
     except Exception as e:
         logger.error(f'Error in add user subscription block: {e}')
         return {'success': False, 'added': False}

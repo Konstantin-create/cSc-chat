@@ -211,3 +211,54 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
+
+    # User subscriptions actions
+    def subscribe_chat(self, chat_id, current_user_id, password_hash):
+        """Function to add user subscription. Get chat_id, current_user_id, password_hash params.
+        Return dict {'success': bool, 'added': bool}"""
+        try:
+            responce_check_id = self.get_chat_info_by_id(chat_id)
+            if responce_check_id['chat']:
+                if responce_check_id['chat']['chat_creator_id'] == current_user_id:
+                    print('U are already in this chat!')
+                    print()
+                else:
+                    responce = json.loads(requests.post(
+                        f'{self.server_ip}/api/user-subscriptions/add', json={'user_id': current_user_id, 'password_hash': password_hash, 'chat_id': chat_id}).text)
+                    return responce
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
+        except Exception as e:
+            logger.error(e)
+
+    def get_user_subscriptions(self, current_user_id, password_hash):
+        """Function to get user subscriptions"""
+        try:
+            responce = json.loads(requests.post(
+                f'{self.server_ip}/api/user-subscriptions/get', json={'user_id': current_user_id, 'password_hash': password_hash}).text)
+            return responce
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
+        except Exception as e:
+            logger.error(e)
+
+    def unsubscribe_chat(self, chat_id, current_user_id, password_hash):
+        """Function to remove user subscription. Get chat_id, current_user_id, password_hash params.
+        Return dict {'success': bool, 'deleted': bool}"""
+        try:
+            responce_check_id = self.get_chat_info_by_id(chat_id)
+            if responce_check_id['chat']:
+                if responce_check_id['chat']['chat_creator_id'] == current_user_id:
+                    print('U cant unsubscribe our own chat!')
+                    print()
+                else:
+                    responce = json.loads(requests.post(
+                        f'{self.server_ip}/api/user-subscription/delete', json={'user_id': current_user_id, 'password_hash': password_hash, 'chat_id0: chat_id'}).text)
+                    return responce
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
+        except Exception as e:
+            logger.error(e)
