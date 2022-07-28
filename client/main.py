@@ -52,13 +52,13 @@ def logged():
             print()
             print('j - join chat by id')
             print('s - show user subscibtions')
-            print("d - delete chat")
+            print("m - moderate chat")
             print("e - exit")
             print("l - logout from device")
             command = input('~ ')
             if command.isdigit():
                 pass  # Вывод сообщений чата
-            elif command.lower().strip() == 'd':
+            elif command.lower().strip() == 'm':
                 clear_screen()
                 delete_chat_menu()
             elif command.lower().strip() == 'e':
@@ -184,8 +184,8 @@ def delete_chat_menu():
     responce = connection.get_user_chats(user['user']['id'])
     for i in range(len(responce['chats'])):
         print(f'{i} - {responce["chats"][i]["chat_name"]}')
-    command = input('\nEnter chat number from list(b - to go back): ')
-    if command.isdigit() and int(command) <= len(responce["chats"])+1:
+    command = input('\nEnter chat number from list to delete chat(b - to go back): ')
+    if command.isdigit() and int(command) <= len(responce["chats"]):
         print(responce['chats'][int(command)])
         connection.delete_chat_by_name(responce['chats'][int(command)]['chat_name'], user['user']['id'], user['user']['password_hash'])
         sys.exit()
@@ -197,6 +197,34 @@ def delete_chat_menu():
         print('Enter number!')
         print()
         delete_chat_menu()
+
+
+def unsubscribe_chats_menu():
+    user = user_obj.is_logged()
+    responce = connection.get_user_subscriptions(user['user']['id'], user['user']['password_hash'])
+    if not responce['success']:
+        print('A server error occured! Try again later')
+        print()
+        command = input('b - back')
+        if command.lower().strip() == 'b':
+            user_subscribtions()
+        else:
+            unsubscribe_chats_menu()
+    elif responce['chats']:
+        for i in range(len(responce['chats'])):
+            print(f'{i} - {responce["chats"][i]["chat_name"]}')
+        command = input('\nEnter chat number from list to unsubscribe chat(b - back)')
+        if command.isdigit() and int(command) <= len(responce['chats']):
+            pass  # todo unsubscribe func
+        elif command.lower().strip() == 'b':
+            user_subscribtions()
+        else:
+            clear_screen()
+            print('Enter number or b')
+            print()
+            unsubscribe_chats_menu()
+    else:
+        user_subscribtions()
 
 
 def user_subscribtions():
@@ -211,6 +239,7 @@ def user_subscribtions():
             print(f'{i} - {responce["chats"][i]["chat_name"]}')
         print()
         print('Enter chat number to print messages')
+        print('m - manage chats')
     else:
         print('This user have no subscibtions!')
     print()
@@ -222,6 +251,9 @@ def user_subscribtions():
     elif command.lower().strip() == 'b':
         clear_screen()
         logged()
+    elif command.lower().strip() == 'm':
+        clear_screen()
+        unsubscribe_chats_menu()
     else:
         user_subscribtions()
 
