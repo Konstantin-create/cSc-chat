@@ -5,7 +5,6 @@ from hashlib import sha256
 from datetime import datetime
 
 
-
 def password_hash(password):
     return sha256(password.encode('utf-8')).hexdigest()
 
@@ -15,7 +14,7 @@ class User:
         self.root = base_dir
         self.cdata = f'{self.root}/cdata'
         self.base_session = {'user': {'id': None, 'username': None, 'password_hash': None}}
-    
+
     # Working with files
     def get_cdata(self):
         """Function to get all data from cdata folder. Return dict {'session': dict, 'chats': list}"""
@@ -32,7 +31,7 @@ class User:
         except Exception as e:
             logger.error(e)
             return {'session': None, 'chats': None}
-    
+
     def set_chats(self, chat_list: list):
         """Function to set chat list. Get chat_list param. Return dict {'recorded': bool}"""
         try:
@@ -56,7 +55,7 @@ class User:
         except Exception as e:
             logger.error(e)
             return {'added': False}
-    
+
     def create_session(self):
         """Function to create empty session file"""
         try:
@@ -79,7 +78,8 @@ class User:
 
     # Login/registration routes
     def is_logged(self):
-        """Function to read cdata/session.session and get user data from threre. Return dict {'logged': bool, 'user': dict}"""
+        """Function to read cdata/session.session and get user data from threre.
+        Return dict {'logged': bool, 'user': dict}"""
         try:
             if os.path.exists(self.cdata) and os.path.exists(f'{self.cdata}/session.session'):
                 session = self.get_cdata()['session']
@@ -93,9 +93,11 @@ class User:
             return {'logged': False, 'user': None}
 
     def login(self, user_id, username, password):
-        """Function to write userdata in session file. Get username, password params. Return dict {'logged': bool, 'user': dict}"""
+        """Function to write userdata in session file. Get username, password params.
+        Return dict {'logged': bool, 'user': dict}"""
         try:
-            user = {'id': user_id, 'username': username, 'password_hash': password_hash(password), 'login_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')}
+            user = {'id': user_id, 'username': username, 'password_hash': password_hash(password),
+                    'login_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')}
             print(user)
             session = self.get_cdata()['session']
             session['user'] = user
@@ -161,4 +163,3 @@ class User:
         except Exception as e:
             logger.error(e)
             return {'deleted': None}
-
