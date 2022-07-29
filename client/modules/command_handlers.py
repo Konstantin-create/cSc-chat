@@ -48,9 +48,10 @@ def logged():
             print()
             print('j - join chat by id')
             print('s - show user subscibtions')
-            print("m - moderate chat")
-            print("e - exit")
-            print("l - logout from device")
+            print('m - moderate chat')
+            print('e - exit')
+            print('l - logout from device')
+            print('d - delete user')
             command = input('~ ')
             if command.isdigit():
                 pass  # Вывод сообщений чата
@@ -78,6 +79,8 @@ def logged():
                         print()
             elif command.lower().strip() == 's':
                 user_subscriptions()
+            elif command.lower().strip() == 'd':
+                delete_user_menu()
             else:
                 clear_screen()
                 logged()
@@ -85,7 +88,7 @@ def logged():
             user_obj.set_chats([])
             print('This user have no chats')
             command = input(
-                'Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\ne - exit\nl - logout from devise\n~ ')
+                'Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\ne - exit\nl - logout from devise\nd - delete user\n~ ')
             if command.isdigit():
                 if int(command) - 1:
                     pass  # Function to join chat
@@ -96,6 +99,8 @@ def logged():
                 sys.exit()
             elif command.lower().strip() == 'l':
                 user_obj.logout()
+            elif command.lower().strip() == 'd':
+                delete_user_menu()
     else:
         user_obj.logout()
         not_logged()
@@ -255,3 +260,19 @@ def user_subscriptions():
         unsubscribe_chats_menu()
     else:
         user_subscriptions()
+
+def delete_user_menu():
+    clear_screen()
+    user = user_obj.is_logged()
+    command = input('Are you sure you want to permanently delete user {user["user"]["username"]}?\n    1 - Yes\n    2 - No(back)\n~ ')
+    if command.isdigit():
+        if int(command) - 1:
+            clear_screen()
+            logged()
+        else:
+            clear_screen()
+            connection.delete_user(user['user']['username'], user['user']['password_hash'])
+            logged()
+    else:
+        delete_user_menu()
+

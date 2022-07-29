@@ -84,13 +84,13 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
-    def delete_user(self, username: str, password):
-        """Delete user function. Get username and password params.
+    def delete_user(self, username: str, password_hash: str):
+        """Delete user function. Get username and password_hash params.
             Return dict {'success': bool, 'deleted': bool}"""
         try:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/delete-user',
-                json={'username': username, 'password-hash': password_hash(password)}).text)
+                json={'username': username, 'password-hash': password_hash}).text)
             return response
         except requests.exceptions.ConnectionError:
             logger.error('No internet connection! Try later')
