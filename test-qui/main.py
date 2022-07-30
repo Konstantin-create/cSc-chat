@@ -1,5 +1,5 @@
 from textual.app import App
-from textual.widgets import Header, Footer, FileClick, ScrollView, DirectoryTree
+from textual.widgets import Header, Button
 from rich.panel import Panel
 from rich.table import Table
 from rich.style import StyleType
@@ -28,5 +28,6 @@ class MyApp(App):
 
     async def on_mount(self) -> None:
         await self.view.dock(CustomHeader(), edge="top")
+        await self.view.dock(Button('Login'), size=3)
 
 MyApp.run(title='Chat')
