@@ -82,6 +82,17 @@ def get_user_id():
         logger.error(f'Error in get user id block: {e}')
         return {'success': False, 'user_id': None}
 
+@app.route('/api/get-username/<int:user_id>')
+def get_username(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        if user:
+            return {'success': True, 'username': user.username}
+        return {'success': True, 'username': None}
+    except Exception as e:
+        logger.error(f'Error in get username block: {e}')
+        return {'success': False, 'username': False}
+
 
 # Delete user
 @app.route('/api/delete-user', methods=['GET', 'POST'])
@@ -211,6 +222,7 @@ def _api_create_message():
     try:  
         if request.method == 'POST':
             data = request.get_json()
+            print(data)
             if User.query.filter_by(id=data['from_user'], password_hash=data['password-hash']).first():
                 new_message = Message(body=data['body'], from_user=data['from_user'], from_chat=data['from_chat'])
                 db.session.add(new_message)

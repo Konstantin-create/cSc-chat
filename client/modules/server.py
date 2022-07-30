@@ -84,6 +84,18 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
+    def get_username_by_id(self, user_id):
+        """Get user name by id. Get user id param.
+            Return dict {'success': bool, 'username': str}"""
+        try:
+            response = json.loads(requests.get(f'{self.server_ip}/api/get-username/{user_id}').text)
+            return response
+        except requests.exceptions.ConnectionError:
+            logger.error('No internet connection! Try later')
+            sys.exit()
+        except Exception as e:
+            logger.error(e)
+
     def delete_user(self, username: str, password_hash: str):
         """Delete user function. Get username and password_hash params.
             Return dict {'success': bool, 'deleted': bool}"""
@@ -178,7 +190,7 @@ class ServerConnection:
             logger.error(e)
 
     # Message actions
-    def create_message(self, from_user: id, from_chat: id, body: str, password):
+    def create_message(self, from_user: id, from_chat: id, body: str, password_hash: str):
         """Create message function. Get from_user, from_chat, body, password params.
             Return dict {'success': bool, 'message': {'id': int, 'from_user': int, 'from_chat': int,
             'body': str, 'time_stamp': obj(datetime)}}"""
@@ -186,7 +198,7 @@ class ServerConnection:
             response = json.loads(requests.post(
                 f'{self.server_ip}/api/message/create',
                 json={'body': body, 'from_user': from_user, 'from_chat': from_chat,
-                      'password-hash': password_hash(password)}).text)
+                      'password-hash': password_hash}).text)
             return response
         except requests.exceptions.ConnectionError:
             logger.error('No internet connection! Try later')

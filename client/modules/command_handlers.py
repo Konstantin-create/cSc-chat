@@ -279,5 +279,31 @@ def delete_user_menu():
 
 def chat_messages_menu(chat_id):
     clear_screen()
+    user = user_obj.is_logged()['user']
     response = connection.get_chat_messages(chat_id['id'])
-    print(response)
+    if response['success']:
+        if response['messages']:
+            chat_usernames = {}
+            for message in response['messages']:
+                if not (message['from_user'] in chat_usernames):
+                    chat_usernames[message['from_user']] = connection.get_username_by_id(message['from_user'])['username']
+                print(chat_usernames[message['from_user']])
+                print(message['body'])
+                print(message['time_stamp'])
+        else:
+            print("This chat have no messages! So it's time to be the first to post!")
+            print("m - new message")
+            print("b - back")
+            command = input('~ ')
+            if command.lower().strip() == 'm':
+                clear_screen()
+                print('Enter message:')
+                message = input('~ ')
+                print(connection.create_message(user['id'], chat_id['id'], message, user['password_hash']))
+            elif commad.lower().strip() == 'b':
+                pass
+            else:
+                chat_messages_menu(chat_id)
+    else:
+        print('An a server error occured! Try later')
+        logged()
