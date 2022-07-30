@@ -284,12 +284,21 @@ def chat_messages_menu(chat_id):
     if response['success']:
         if response['messages']:
             chat_usernames = {}
+            dated_messages = {}
             for message in response['messages']:
                 if not (message['from_user'] in chat_usernames):
                     chat_usernames[message['from_user']] = connection.get_username_by_id(message['from_user'])['username']
-                print(chat_usernames[message['from_user']])
-                print(message['body'])
-                print(message['time_stamp'])
+                time_stamp = message['time_stamp'].split()
+                message_time_stamp = f'{time_stamp[0]} {time_stamp[1]} {time_stamp[2]} {time_stamp[3]}'
+                if not message_time_stamp in dated_messages:
+                    dated_messages[message_time_stamp] = []
+                    dated_messages[message_time_stamp].append(message)
+            for key in dated_messages:
+                print(('-' * 50).center(len(key) + 200))
+                print(key.center(len(key)+200))
+                for message in dated_messages[key]:
+                    print(f'From user: {message["from_user"]}')
+                    print('    ' + message['body'])
         else:
             print("This chat have no messages! So it's time to be the first to post!")
             print("m - new message")
