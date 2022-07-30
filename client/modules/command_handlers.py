@@ -53,8 +53,8 @@ def logged():
             print('l - logout from device')
             print('d - delete user')
             command = input('~ ')
-            if command.isdigit():
-                pass  # Вывод сообщений чата
+            if command.isdigit() and int(command) <= len(response['chats']):
+                chat_messages_menu(response['chats'][int(command)])
             elif command.lower().strip() == 'm':
                 clear_screen()
                 delete_chat_menu()
@@ -88,7 +88,8 @@ def logged():
             user_obj.set_chats([])
             print('This user have no chats')
             command = input(
-                'Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\ne - exit\nl - logout from devise\nd - delete user\n~ ')
+                'Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n \
+                e - exit\nl - logout from devise\nd - delete user\n~ ')
             if command.isdigit():
                 if int(command) - 1:
                     pass  # Function to join chat
@@ -276,3 +277,7 @@ def delete_user_menu():
     else:
         delete_user_menu()
 
+def chat_messages_menu(chat_id):
+    clear_screen()
+    response = connection.get_chat_messages(chat_id['id'])
+    print(response)
