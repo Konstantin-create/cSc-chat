@@ -54,7 +54,7 @@ def logged():
             print('d - delete user')
             command = input('~ ')
             if command.isdigit() and int(command) <= len(response['chats']):
-                chat_messages_menu(response['chats'][int(command)])
+                chat_messages_menu(response['chats'][int(command)]['id'])
             elif command.lower().strip() == 'm':
                 clear_screen()
                 delete_chat_menu()
@@ -88,14 +88,15 @@ def logged():
             user_obj.set_chats([])
             print('This user have no chats')
             command = input(
-                'Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n \
-                e - exit\nl - logout from devise\nd - delete user\n~ ')
+                'Select menu item:\n    1 - Create new chat\n    2 - Join chat by chat id\n\ns - show usersubscriptions\ne - exit\nl - logout from devise\nd - delete user\n~ ')
             if command.isdigit():
                 if int(command) - 1:
-                    pass  # Function to join chat
+                    subscribe_chat_menu()
                 else:
                     clear_screen()
                     create_chat()
+            elif command.lower().strip() == 's':
+                user_subscriptions()
             elif command.lower().strip() == 'e':
                 sys.exit()
             elif command.lower().strip() == 'l':
@@ -203,6 +204,23 @@ def delete_chat_menu():
         print()
         delete_chat_menu()
 
+def subscribe_chat_menu():
+    clear_screen()
+    user = user_obj.is_logged()
+    while True:
+        chanel_to_sub = input('Enter chat id to join(b - back):')
+        if chanel_to_sub.isdigit():
+            print(connection.subscribe_chat(int(chanel_to_sub), user['user']['id'],
+                                            user['user']['password_hash']))
+            break
+        elif chanel_to_sub.lower().strip() == 'b':
+            clear_screen()
+            logged()
+            break
+        else:
+            clear_screen()
+            print('Enter chat id or "b" to back!')
+            print()
 
 def unsubscribe_chats_menu():
     user = user_obj.is_logged()
@@ -252,7 +270,7 @@ def user_subscriptions():
     command = input('~ ')
     if command.isdigit():
         if int(command) <= len(response['chats']):
-            pass  # Todo print messages
+            chat_messages_menu(response['chats'][int(command)]['id'])
     elif command.lower().strip() == 'b':
         clear_screen()
         logged()
@@ -280,7 +298,7 @@ def delete_user_menu():
 def chat_messages_menu(chat_id):
     clear_screen()
     user = user_obj.is_logged()['user']
-    response = connection.get_chat_messages(chat_id['id'])
+    response = connection.get_chat_messages(chat_id)
     if response['success']:
         if response['messages']:
             chat_usernames = {}
@@ -292,13 +310,27 @@ def chat_messages_menu(chat_id):
                 message_time_stamp = f'{time_stamp[0]} {time_stamp[1]} {time_stamp[2]} {time_stamp[3]}'
                 if not message_time_stamp in dated_messages:
                     dated_messages[message_time_stamp] = []
-                    dated_messages[message_time_stamp].append(message)
+                dated_messages[message_time_stamp].append(message)
             for key in dated_messages:
                 print(('-' * 50).center(len(key) + 200))
                 print(key.center(len(key)+200))
                 for message in dated_messages[key]:
-                    print(f'From user: {message["from_user"]}')
+                    if chat_usernames[message['from_user']] == user['username']:
+                        print('    From me')
+                    else:
+                        print(f'    From {chat_usernames[message["from_user"]]}')
                     print('    ' + message['body'])
+                    print()
+                    print()
+            print('b - back', 'u - update messages', 'm - create new message')
+            command = input('~ ')
+            if command == 'b':
+                clear_screen()
+                logged()
+            elif command == 'u':
+                chat_messages_menu(chat_id)
+            elif command == 'm':
+                create_message_menu(chat_id)
         else:
             print("This chat have no messages! So it's time to be the first to post!")
             print("m - new message")
@@ -308,11 +340,25 @@ def chat_messages_menu(chat_id):
                 clear_screen()
                 print('Enter message:')
                 message = input('~ ')
-                print(connection.create_message(user['id'], chat_id['id'], message, user['password_hash']))
+                print(connection.create_message(user['id'], chat_id, message, user['password_hash']))
+                clear_screen()
+                chat_messages_menu(chat_id)
             elif commad.lower().strip() == 'b':
-                pass
+                clear_screen()
+                logged()
             else:
                 chat_messages_menu(chat_id)
     else:
         print('An a server error occured! Try later')
         logged()
+
+
+def create_message_menu(chat_id):
+    user = user_obj.is_logged()['user']
+    print('Enter a message (leave blank to go back): ')
+    message = input('~ ').strip()
+    if len(message) != 0:
+        print(connection.create_message(user['id'], chat_id, message, user['password_hash']))
+        chat_messages_menu(chat_id)
+    else:
+        chat_messages_menu(chat_id)

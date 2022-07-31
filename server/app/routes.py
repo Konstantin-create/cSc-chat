@@ -272,6 +272,7 @@ def _api_get_chat_messages(chat_id):
     try:
         output_messages = []
         messages = Message.query.filter_by(from_chat=chat_id).all()
+        print(messages)
         if messages is not None:
             for message in messages:
                 output_messages.append({'id': message.id, 'from_user': message.from_user, 'from_chat': message.from_chat, 'body': message.body, 'time_stamp': message.time_stamp})
