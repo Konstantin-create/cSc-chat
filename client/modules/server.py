@@ -221,12 +221,12 @@ class ServerConnection:
         except Exception as e:
             logger.error(e)
 
-    def delete_message(self, message_id: int, user_id, password):
+    def delete_message(self, message_id: int, user_id, password_hash):
         """Delete message function. Get message_id param. Return dict {'success': bool, 'deleted': bool}"""
         try:
             response = json.loads(requests.post(f'{self.server_ip}/api/message/delete',
                                                 json={'message_id': message_id, 'user_id': user_id,
-                                                      'password-hash': password_hash(password)}).text)
+                                                      'password-hash': password_hash}).text)
             return response
         except requests.exceptions.ConnectionError:
             logger.error('No internet connection! Try later')

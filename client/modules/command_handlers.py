@@ -48,6 +48,7 @@ def logged():
             print()
             print('j - join chat by id')
             print('s - show user subscibtions')
+            print()
             print('m - moderate chat')
             print('e - exit')
             print('l - logout from device')
@@ -322,7 +323,7 @@ def chat_messages_menu(chat_id):
                     print('    ' + message['body'])
                     print()
                     print()
-            print('b - back', 'u - update messages', 'm - create new message')
+            print('b - back', 'u - update messages', 'm - create new message', 'd - delete message')
             command = input('~ ')
             if command == 'b':
                 clear_screen()
@@ -331,9 +332,11 @@ def chat_messages_menu(chat_id):
                 chat_messages_menu(chat_id)
             elif command == 'm':
                 create_message_menu(chat_id)
+            elif command == 'd':
+                delete_message_menu(chat_id)
         else:
             print("This chat have no messages! So it's time to be the first to post!")
-            print("m - new message")
+            print('m - new message')
             print("b - back")
             command = input('~ ')
             if command.lower().strip() == 'm':
@@ -362,3 +365,36 @@ def create_message_menu(chat_id):
         chat_messages_menu(chat_id)
     else:
         chat_messages_menu(chat_id)
+
+def delete_message_menu(chat_id):
+    user = user_obj.is_logged()['user']
+    response = connection.get_chat_messages(chat_id)
+    if response['success']:
+        if response['messages']:
+            messages_to_delete = []
+            for i in range(len(response['messages'])):
+                if response['messages'][i]['from_user'] == user['id']:
+                    tmp_message = response['messages'][i]
+                    messages_to_delete.append(tmp_message)
+                    print(f'{i} - From me: {tmp_message["body"]}    {tmp_message["time_stamp"]}')
+            if len(tmp_message) != 0:
+                command = input('Print message id from list to delete(b - back): ')
+                if command.isdigit():
+                    if int(command) <= len(response['messages']):
+                        connection.delete_message(response['messages'][int(command)]['id'], user['id'], user['password_hash'])
+                        logged()
+                elif command.lower().strip() == 'b':
+                    logged()
+                else:
+                    delete_message_menu(chat_id)
+        else:
+            clear_screen()
+            print('There is not messages to delete here! Press any key to go back')
+            input()
+            clear_screen()
+            logged()
+    else:
+        clear_screen()
+        logged()
+
+    
